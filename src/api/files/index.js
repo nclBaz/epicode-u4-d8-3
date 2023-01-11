@@ -11,6 +11,7 @@ import {
   writeUsers,
   getBooksJsonReadableStream,
 } from "../../lib/fs-tools.js"
+import { getPDFReadableStream } from "../../lib/pdf-tools.js"
 
 const filesRouter = express.Router()
 
@@ -88,6 +89,31 @@ filesRouter.get("/booksJSON", (req, res, next) => {
   } catch (error) {
     next(error)
   }
+})
+
+filesRouter.get("/pdf", (req, res, next) => {
+  res.setHeader("Content-Disposition", "attachment; filename=test.pdf")
+
+  const source = getPDFReadableStream([
+    {
+      asin: "0345546792",
+      title: "The Silent Corner: A Novel of Suspense (Jane Hawk)",
+      img: "https://images-na.ssl-images-amazon.com/images/I/91dDIYze1wL.jpg",
+      price: 7.92,
+      category: "horror",
+    },
+    {
+      asin: "0735218994",
+      title: "Celtic Empire (Dirk Pitt Adventure)",
+      img: "https://images-na.ssl-images-amazon.com/images/I/91xI4GjM7jL.jpg",
+      price: 17.32,
+      category: "horror",
+    },
+  ])
+  const destination = res
+  pipeline(source, destination, err => {
+    if (err) console.log(err)
+  })
 })
 
 export default filesRouter
